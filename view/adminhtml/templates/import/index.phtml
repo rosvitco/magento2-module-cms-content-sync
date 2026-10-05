@@ -1,0 +1,173 @@
+<?php
+/**
+ * Copyright © Rosvit. All rights reserved.
+ *
+ * @var \Magento\Backend\Block\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+
+use Rosvit\CmsContentSync\Model\Import\Parser;
+use Rosvit\CmsContentSync\Model\Import\Preview;
+
+/** @var array{envelope: array, rows: array}|null $preview */
+$preview = $block->getData('preview');
+$rows = $preview['rows'] ?? [];
+$envelope = $preview['envelope'] ?? [];
+
+$statusLabels = [
+    Preview::STATUS_NEW       => __('Create'),
+    Preview::STATUS_UPDATE    => __('Update'),
+    Preview::STATUS_UNCHANGED => __('No changes'),
+    Preview::STATUS_ERROR     => __('Error'),
+];
+
+$typeLabels = [
+    'cms_page'  => __('Page'),
+    'cms_block' => __('Block'),
+];
+
+$importable = static fn(array $row): bool => $row['status'] !== Preview::STATUS_ERROR;
+$checkedByDefault = static fn(array $row): bool => in_array(
+    $row['status'],
+    [Preview::STATUS_NEW, Preview::STATUS_UPDATE],
+    true
+);
+?>
+<div class="cms-content-sync-import">
+    <form action="<?= $escaper->escapeUrl($block->getUrl('cmscontentsync/import/upload')) ?>"
+          method="post"
+          enctype="multipart/form-data"
+          id="cms-content-sync-upload-form">
+        <input name="form_key" type="hidden" value="<?= $escaper->escapeHtmlAttr($block->getFormKey()) ?>"/>
+
+        <fieldset class="admin__fieldset">
+            <legend class="admin__legend">
+                <span><?= $escaper->escapeHtml(__('Import CMS Content')) ?></span>
+            </legend>
+            <br>
+
+            <div class="admin__field">
+                <label class="admin__field-label" for="import_file">
+                    <span><?= $escaper->escapeHtml(__('Export File')) ?></span>
+                </label>
+                <div class="admin__field-control">
+                    <input type="file"
+                           name="import_file"
+                           id="import_file"
+                           accept=".json,application/json"
+                           class="admin__control-file"
+                           required/>
+                    <div class="admin__field-note">
+                        <span>
+                            <?= $escaper->escapeHtml(
+                                __(
+                                    'A .json file exported from another environment, up to %1 MB.',
+                                    round(Parser::MAX_FILE_SIZE / 1024 / 1024)
+                                )
+                            ) ?>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+        <div class="page-actions">
+            <button type="submit" class="action-primary">
+                <span><?= $escaper->escapeHtml(__('Upload and Preview')) ?></span>
+            </button>
+        </div>
+    </form>
+
+    <?php if ($rows): ?>
+        <form action="<?= $escaper->escapeUrl($block->getUrl('cmscontentsync/import/process')) ?>"
+              method="post"
+              id="cms-content-sync-process-form">
+            <input name="form_key" type="hidden" value="<?= $escaper->escapeHtmlAttr($block->getFormKey()) ?>"/>
+
+            <fieldset class="admin__fieldset">
+                <legend class="admin__legend">
+                    <span><?= $escaper->escapeHtml(__('Preview')) ?></span>
+                </legend>
+                <br>
+
+                <?php if ($envelope): ?>
+                    <div class="admin__field-note">
+                        <span>
+                            <?= $escaper->escapeHtml(
+                                __(
+                                    'Exported from %1 by %2 on %3.',
+                                    $envelope['exported_from'] ?? __('an unknown environment'),
+                                    $envelope['exported_by'] ?: __('an unknown user'),
+                                    $envelope['exported_at'] ?? __('an unknown date')
+                                )
+                            ) ?>
+                        </span>
+                    </div>
+                    <br>
+                <?php endif; ?>
+
+                <table class="data-grid">
+                    <thead>
+                        <tr>
+                            <th class="data-grid-th data-grid-checkbox-cell">
+                                <input type="checkbox" id="cms-content-sync-select-all" title="<?= $escaper->escapeHtmlAttr(__('Select All')) ?>"/>
+                            </th>
+                            <th class="data-grid-th"><?= $escaper->escapeHtml(__('Type')) ?></th>
+                            <th class="data-grid-th"><?= $escaper->escapeHtml(__('Identifier')) ?></th>
+                            <th class="data-grid-th"><?= $escaper->escapeHtml(__('Title')) ?></th>
+                            <th class="data-grid-th"><?= $escaper->escapeHtml(__('Store Views')) ?></th>
+                            <th class="data-grid-th"><?= $escaper->escapeHtml(__('Status')) ?></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <?php foreach ($rows as $row): ?>
+                        <tr class="data-row cms-content-sync-status-<?= $escaper->escapeHtmlAttr($row['status']) ?>">
+                            <td class="data-grid-checkbox-cell">
+                                <input type="checkbox"
+                                       class="cms-content-sync-row"
+                                       name="rows[]"
+                                       value="<?= $escaper->escapeHtmlAttr((string)$row['row_id']) ?>"
+                                       <?= $checkedByDefault($row) ? 'checked' : '' ?>
+                                       <?= $importable($row) ? '' : 'disabled' ?>/>
+                            </td>
+                            <td><?= $escaper->escapeHtml($typeLabels[$row['entity_type']] ?? $row['entity_type']) ?></td>
+                            <td><?= $escaper->escapeHtml($row['identifier']) ?></td>
+                            <td><?= $escaper->escapeHtml($row['title']) ?></td>
+                            <td><?= $escaper->escapeHtml($row['stores']) ?></td>
+                            <td>
+                                <?= $escaper->escapeHtml($statusLabels[$row['status']] ?? $row['status']) ?>
+                                <?php if ($row['message']): ?>
+                                    <div class="admin__field-note">
+                                        <span><?= $escaper->escapeHtml($row['message']) ?></span>
+                                    </div>
+                                <?php endif; ?>
+                                <?php foreach ($row['warnings'] ?? [] as $warning): ?>
+                                    <div class="message message-warning">
+                                        <span><?= $escaper->escapeHtml($warning) ?></span>
+                                    </div>
+                                <?php endforeach; ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </fieldset>
+
+            <div class="page-actions">
+                <button type="submit" class="action-primary">
+                    <span><?= $escaper->escapeHtml(__('Import Selected')) ?></span>
+                </button>
+            </div>
+        </form>
+
+        <script>
+            require(['jquery'], function ($) {
+                'use strict';
+
+                $('#cms-content-sync-select-all').on('change', function () {
+                    $('.cms-content-sync-row').not(':disabled').prop('checked', this.checked);
+                });
+            });
+        </script>
+    <?php endif; ?>
+</div>

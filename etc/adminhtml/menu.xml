@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Rosvit. All rights reserved.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Rosvit_CmsContentSync::sync"
+             title="CMS Content Sync"
+             module="Rosvit_CmsContentSync"
+             sortOrder="90"
+             parent="Magento_Backend::content"
+             action="cmscontentsync/import/index"
+             resource="Rosvit_CmsContentSync::import"/>
+    </menu>
+</config>

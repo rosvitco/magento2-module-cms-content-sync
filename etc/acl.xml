@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Rosvit. All rights reserved.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Acl/etc/acl.xsd">
+    <acl>
+        <resources>
+            <resource id="Magento_Backend::admin">
+                <resource id="Magento_Backend::content">
+                    <resource id="Rosvit_CmsContentSync::sync" title="CMS Content Sync" sortOrder="100">
+                        <resource id="Rosvit_CmsContentSync::export" title="Export CMS Content" sortOrder="10"/>
+                        <resource id="Rosvit_CmsContentSync::import" title="Import CMS Content" sortOrder="20"/>
+                    </resource>
+                </resource>
+            </resource>
+        </resources>
+    </acl>
+</config>

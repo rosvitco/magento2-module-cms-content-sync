@@ -1,0 +1,35 @@
+{
+    "name": "rosvit/module-cms-content-sync",
+    "description": "Export and import CMS Pages and Blocks between environments as JSON.",
+    "type": "magento2-module",
+    "keywords": [
+        "magento",
+        "magento2",
+        "cms",
+        "export",
+        "import",
+        "page-builder"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Rosvit"
+        }
+    ],
+    "require": {
+        "php": "~8.2.0||~8.3.0||~8.4.0||~8.5.0",
+        "magento/framework": "^103.0",
+        "magento/module-cms": "^104.0",
+        "magento/module-backend": "^102.0",
+        "magento/module-ui": "^101.2",
+        "magento/module-store": "^101.1"
+    },
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "Rosvit\\CmsContentSync\\": ""
+        }
+    }
+}

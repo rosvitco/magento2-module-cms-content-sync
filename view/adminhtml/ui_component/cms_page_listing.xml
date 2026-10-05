@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/**
+ * Copyright © Rosvit. All rights reserved.
+ */
+-->
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <listingToolbar name="listing_top">
+        <massaction name="listing_massaction">
+            <action name="cms_content_sync_export">
+                <settings>
+                    <url path="cmscontentsync/export/masspage"/>
+                    <type>cms_content_sync_export</type>
+                    <label translate="true">Export to JSON</label>
+                </settings>
+            </action>
+        </massaction>
+    </listingToolbar>
+</listing>
